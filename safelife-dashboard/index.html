@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeLife - AI Healthcare Dashboard</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@600;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- jsPDF & html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css?v=2">
+</head>
+
+<body>
+    <!-- Login Screen -->
+    <div class="login-overlay active" id="login-overlay" style="display: flex;">
+        <div class="login-card glass-effect">
+            <div class="login-header">
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="activity" class="login-logo-icon"></i>
+                </div>
+                <h1 class="logo-text">SafeLife</h1>
+                <p>Authorized Personnel Only</p>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Cloud IAM User</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="user" class="input-icon"></i>
+                        <input type="text" id="username" placeholder="admin" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">IAM Password</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" id="password" placeholder="••••••••" required />
+                    </div>
+                </div>
+                <div class="error-msg" id="login-error" style="display:none;">Invalid credentials. Hint: admin /
+                    password</div>
+                <button type="submit" class="btn-primary w-full login-btn">
+                    Authenticate Session <i data-lucide="arrow-right" size="16"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="app-layout">
+        <!-- Sidebar layout for KPIs -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="activity" class="logo-icon"></i>
+                </div>
+                <span class="logo-text">SafeLife</span>
+            </div>
+
+            <div class="kpi-container" id="kpi-section">
+                <!-- Vertical KPI Cards injected here -->
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="top-header glass-effect">
+                <p class="sub-quote">AI-powered analytics to optimize donor outreach, engagement, and retention.</p>
+                <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="live-status">
+                        <span class="pulse-dot"></span>
+                        <span>Live</span>
+                    </div>
+                    <button id="logout-btn" class="btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem;">
+                        <i data-lucide="log-out" size="14"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+
+                <!-- Left Column (Performance & Comparison) -->
+                <div class="grid-col start-col">
+                    <section class="panel">
+                        <header class="panel-header compact-header">
+                            <h2><i data-lucide="trending-up" size="16"></i> Campaign Engine</h2>
+                        </header>
+                        <div class="panel-content stack-sm">
+                            <div class="funnel-container flex-1">
+                                <h3 class="micro-title">Funnel Drop-off</h3>
+                                <div class="funnel-chart" id="funnel-chart"></div>
+                            </div>
+                            <div class="bar-chart-container flex-1">
+                                <h3 class="micro-title">Channel Conversion</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="channelChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="panel min-panel">
+                        <header class="panel-header compact-header">
+                            <h2><i data-lucide="git-compare" size="16"></i> Compare</h2>
+                        </header>
+                        <div class="panel-content comp-content">
+                            <div class="compare-selectors inline">
+                                <select id="compare-1" class="custom-select sm">
+                                    <option value="summer23">Summer '23</option>
+                                    <option value="monsoon23">Monsoon '23</option>
+                                </select>
+                                <span class="vs">vs</span>
+                                <select id="compare-2" class="custom-select sm">
+                                    <option value="monsoon23">Monsoon '23</option>
+                                    <option value="winter23" selected>Winter '23</option>
+                                </select>
+                            </div>
+                            <div id="compare-results" class="compact-results"></div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Middle Column (Map Centerpiece) -->
+                <div class="grid-col map-col">
+                    <section class="panel map-panel relative">
+                        <header class="panel-header compact-header map-header">
+                            <h2><i data-lucide="map-pin" size="16"></i> Live Density (India)</h2>
+                        </header>
+
+                        <div class="panel-content map-outer">
+                            <div class="map-wrapper">
+                                <img src="images/india.svg" class="india-map-img" alt="India Map Outline" />
+                                <div id="map-container" class="map-pins-overlay">
+                                    <!-- Map pins injected via JS -->
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary float-report-btn" id="btn-generate-report">
+                            <i data-lucide="wand-2" size="16"></i> Generate AI Report
+                        </button>
+                    </section>
+                </div>
+
+                <!-- Right Column (AI Insights) -->
+                <div class="grid-col end-col">
+                    <section class="panel">
+                        <header class="panel-header compact-header">
+                            <h2><i data-lucide="pie-chart" size="16"></i> Segments</h2>
+                            <select id="segment-selector" class="custom-select sm">
+                                <option value="first-time">1st-Time</option>
+                                <option value="repeat">Repeat</option>
+                                <option value="rare">Rare</option>
+                            </select>
+                        </header>
+                        <div class="panel-content chart-squeeze flex-col overflow-y">
+                            <div class="chart-wrapper doughnut-wrap flex-1">
+                                <canvas id="segmentChart"></canvas>
+                            </div>
+                            <div class="insight-box" id="insight-box">
+                                <i data-lucide="sparkles" class="insight-icon" size="14"></i>
+                                <p id="insight-text" class="text-sm">Analyzing segment data...</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="panel highlight-panel predictive-panel">
+                        <header class="panel-header compact-header border-light text-white">
+                            <h2><i data-lucide="brain-circuit" size="16"></i> Predictive AI</h2>
+                        </header>
+                        <div class="panel-content stack-sm tight">
+                            <div class="sub-card sm-card">
+                                <h3 class="micro-title text-light">Propensity Scores</h3>
+                                <div class="table-container small-table">
+                                    <table id="propensity-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Donor</th>
+                                                <th>Best Path</th>
+                                                <th>Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="sub-card sm-card lapse-risk">
+                                <h3 class="micro-title text-light"><i data-lucide="alert-triangle" size="12"></i> Lapse
+                                    Risk</h3>
+                                <div id="lapse-stats" class="compact-lapse"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-content glass-effect" id="pdf-capture-area">
+            <header class="modal-header" data-html2canvas-ignore="true">
+                <h2>SafeLife Intelligence Report</h2>
+                <button class="btn-close" id="btn-close-modal"><i data-lucide="x"></i></button>
+            </header>
+            <div class="modal-header" style="display:none;" id="pdf-header">
+                <h2>SafeLife Intelligence Report</h2>
+            </div>
+            <div class="modal-body" id="report-content"></div>
+            <footer class="modal-footer" data-html2canvas-ignore="true">
+                <button class="btn-secondary" id="btn-download-pdf"><i data-lucide="download"></i> Download Exact
+                    PDF</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Application Scripts -->
+    <script type="module" src="js/data.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
