@@ -1,8 +1,8 @@
-**🩸 Blood Donation Campaign Effectiveness Analytics**
+# 🩸 Blood Donation Campaign Effectiveness Analytics
 
 A cloud-based analytics system that helps blood banks analyze campaign performance, predict donor behavior, and generate intelligent insights using AWS services, Machine Learning, and Generative AI.
 
-**🚀 Features**
+## 🚀 Features
 
 * Campaign performance analysis
 * Donor response prediction
